@@ -1,8 +1,8 @@
 """Database initialization
 
-Revision ID: a36aae94e6ad
+Revision ID: cf52931a86bb
 Revises: 
-Create Date: 2023-09-29 21:25:40.375968
+Create Date: 2023-09-30 01:44:12.817140
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'a36aae94e6ad'
+revision: str = 'cf52931a86bb'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -62,7 +62,7 @@ def upgrade() -> None:
     )
     op.create_table('tokens',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('token', sa.String(), nullable=False),
+    sa.Column('access_token', sa.String(), nullable=False),
     sa.Column('refresh_token', sa.String(), nullable=False),
     sa.Column('data_time', sa.DateTime(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
