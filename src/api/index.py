@@ -11,8 +11,8 @@ route_description = {
     'description': (
         "Проверяет доступно ли приложение\n\n"
         "Check availability of application"
-    )
-
+    ),
+    'summary': "Check app",
 }
 
 
@@ -21,4 +21,5 @@ route_description = {
 async def index_handler():
     return JSONResponse(
         content=ResponseModel(message=f"{datetime.now()}: Working...").__dict__,
-        status_code=status.HTTP_200_OK)
+        status_code=status.HTTP_200_OK
+    )
