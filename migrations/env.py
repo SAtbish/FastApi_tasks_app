@@ -4,7 +4,8 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from src.db.db import Base, DB_USER, DB_PSW, DB_HOST, DB_PORT, DB_NAME
+from src.db.db import Base
+from config import DB_USER, DB_PSW, DB_HOST, DB_PORT, DB_NAME
 from src.models.users import Users
 from src.models.tasks import Tasks
 from src.models.notifications import Notifications
