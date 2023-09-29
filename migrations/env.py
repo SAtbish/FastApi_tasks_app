@@ -7,6 +7,10 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from db.db import Base, DB_USER, DB_PSW, DB_HOST, DB_PORT, DB_NAME
 from models.users import Users
 from models.tasks import Tasks
+from models.notifications import Notifications
+from models.notification_types import NotificationTypes
+from models.tasks_attachments import TaskAttachments
+from models.tokens import Tokens
 from alembic import context
 
 config = context.config
