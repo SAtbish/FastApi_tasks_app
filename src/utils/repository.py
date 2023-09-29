@@ -40,7 +40,9 @@ class SQLAlchemyRepository(AbstractRepository):
     async def read_one(self, **filters):
         stmt = select(self.model).filter_by(**filters)
         objects = await self.session.execute(stmt)
-        obj = objects.scalar_one().to_read_model()
+        obj = objects.first()
+        if obj:
+            obj = obj[0].to_read_model()
         return obj
 
     async def update_one(self, obj_id: int, data: dict) -> int:
