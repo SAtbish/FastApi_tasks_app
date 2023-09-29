@@ -4,13 +4,13 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from db.db import Base, DB_USER, DB_PSW, DB_HOST, DB_PORT, DB_NAME
-from models.users import Users
-from models.tasks import Tasks
-from models.notifications import Notifications
-from models.notification_types import NotificationTypes
-from models.tasks_attachments import TaskAttachments
-from models.tokens import Tokens
+from src.db.db import Base, DB_USER, DB_PSW, DB_HOST, DB_PORT, DB_NAME
+from src.models.users import Users
+from src.models.tasks import Tasks
+from src.models.notifications import Notifications
+from src.models.notification_types import NotificationTypes
+from src.models.tasks_attachments import TaskAttachments
+from src.models.tokens import Tokens
 from alembic import context
 
 config = context.config
