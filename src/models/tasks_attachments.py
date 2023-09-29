@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
-from db.db import Base
+from src.db.db import Base
 
 
 class TaskAttachments(Base):
