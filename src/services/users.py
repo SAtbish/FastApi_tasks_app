@@ -58,3 +58,22 @@ class UsersService:
             users = await uow.users.get_all()
             return users
 
+    @staticmethod
+    async def delete_user_by_id(uow: IUnitOfWork, user_id: int):
+        async with uow:
+            deleted_tokens_ids = [del_id[0] for del_id in await uow.tokens.delete(user_id=user_id)]
+            deleted_tasks_ids = [del_id.id for del_id in await uow.tasks.get_all(author_id=user_id)]
+            deleted_tasks_ids += [del_id.id for del_id in await uow.tasks.get_all(assignee_id=user_id)]
+            deleted_tasks_ids = set(deleted_tasks_ids)
+            for task_id in deleted_tasks_ids:
+                await uow.tasks_attachments.delete(task_id=task_id)
+                await uow.tasks.delete_one_by_id(obj_id=task_id)
+            deleted_notifications_ids = [del_id[0] for del_id in await uow.notifications.delete(user_id=user_id)]
+            deleted_user_id = await uow.users.delete_one_by_id(obj_id=user_id)
+            await uow.commit()
+            return {
+                "deleted_user_id": deleted_user_id,
+                "deleted_tokens_ids": deleted_tokens_ids,
+                "deleted_tasks_ids": deleted_tasks_ids,
+                "deleted_notifications_ids": deleted_notifications_ids
+            }
