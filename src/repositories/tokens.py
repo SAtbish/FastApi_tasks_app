@@ -12,7 +12,7 @@ from secrets import token_urlsafe
 class TokensRepository(SQLAlchemyRepository):
     model = Tokens
 
-    async def get_token(self, user_id: int) -> TokensSchema:
+    async def get_user_token(self, user_id: int) -> TokensSchema:
         token = await self.read_one(user_id=user_id)
         if not token:
             return await self.create_one(
@@ -26,7 +26,7 @@ class TokensRepository(SQLAlchemyRepository):
         else:
             return token.to_read_model()
 
-    async def renew_token(self, user_id: int, refresh_token: str) -> tuple[dict[str|Any], Error]:
+    async def renew_token(self, user_id: int, refresh_token: str) -> tuple[dict[str | Any], Error]:
         token = await self.read_one(user_id=user_id)
         if not token:
             return {}, "token_not_exist"
@@ -36,14 +36,14 @@ class TokensRepository(SQLAlchemyRepository):
 
         if diff_seconds <= TOKEN_UPDATE_TIME or token.is_permanent:
             return {
-                "token": token.token,
+                "access_token": token.access_token,
                 "user_id": user_id,
                 "refresh_token": token.refresh_token,
             }, None
         else:
             if refresh_token == token.refresh_token:
                 new_token_data = {
-                    "token": token_urlsafe(64),
+                    "access_token": token_urlsafe(64),
                     "refresh_token": token_urlsafe(64),
                     "data_time": datetime.now(),
                 }
