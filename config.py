@@ -23,4 +23,4 @@ DB_USER = os.getenv("DB_USER")
 DB_PSW = os.getenv("DB_PSW")
 DB_NAME = os.getenv("DB_NAME")
 
-TOKEN_UPDATE_TIME = os.getenv("TOKEN_UPDATE_TIME")
+TOKEN_UPDATE_TIME = int(os.getenv("TOKEN_UPDATE_TIME"))
