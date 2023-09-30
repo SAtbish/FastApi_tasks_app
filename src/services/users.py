@@ -72,6 +72,25 @@ class UsersService:
             return user, None
 
     @staticmethod
+    async def update_user_password(uow: IUnitOfWork, user_id: int, old_password: str, new_password: str):
+        async with uow:
+            user = await uow.users.read_one(id=user_id)
+            if not user:
+                return {}, "user_not_exist"
+
+            if check_password_hash(user.password, old_password):
+                user = await uow.users.update_one(
+                    obj_id=user_id,
+                    data={
+                        "password": generate_password_hash(new_password)
+                    }
+                )
+                await uow.commit()
+                return user, None
+            else:
+                return {}, "incorrect_password"
+
+    @staticmethod
     async def delete_user_by_id(uow: IUnitOfWork, user_id: int):
         async with uow:
             deleted_tokens_ids = [del_id[0] for del_id in await uow.tokens.delete(user_id=user_id)]
