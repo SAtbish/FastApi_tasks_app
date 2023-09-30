@@ -44,3 +44,10 @@ class GetUserRequest(BaseModel):
 
     def get_not_none_values(self):
         return self.model_dump()
+
+
+class UserDeletionInfo(BaseModel):
+    deleted_user_id: int
+    deleted_tokens_ids: list[int]
+    deleted_tasks_ids: list[int]
+    deleted_notifications_ids: list[int]
