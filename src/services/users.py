@@ -61,6 +61,12 @@ class UsersService:
             users = await uow.users.get_all()
             return users
 
+    @staticmethod
+    async def get_all_paginated(uow: IUnitOfWork):
+        async with uow:
+            users = await uow.users.get_all_paginated()
+            return users
+
     async def update_user_info(self, uow: IUnitOfWork, user_id: int, user_info: dict):
         if user_info.get("login") and await self.check_login(uow, user_info.get("login")):
             return {}, "login_exist"
