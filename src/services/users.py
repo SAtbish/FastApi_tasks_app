@@ -8,18 +8,30 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class UsersService:
     @staticmethod
-    async def create_user(uow: IUnitOfWork, user: UserRegistration) -> tuple[dict[str | Any], Error]:
+    async def get_user(uow: IUnitOfWork, user_info: dict[str, Any]):
         async with uow:
-            # checking for login existence
-            exist_login = await uow.users.read_one(login=user.login)
-            if exist_login:
-                return {}, "login_exist"
+            user = await uow.users.read_one(**user_info)
+            if not user:
+                return None, "user_not_exist"
+            else:
+                return user.to_read_model(), None
 
-            # checking for email existence
-            exist_email = await uow.users.read_one(email=user.email)
-            if exist_email:
-                return {}, "email_exist"
+    @staticmethod
+    async def check_login(uow: IUnitOfWork, login: str):
+        async with uow:
+            return await uow.users.read_one(login=login)
 
+    @staticmethod
+    async def check_email(uow: IUnitOfWork, email: str):
+        async with uow:
+            return await uow.users.read_one(email=email)
+
+    async def create_user(self, uow: IUnitOfWork, user: UserRegistration) -> tuple[dict[str | Any], Error]:
+        if await self.check_login(uow, user.login):
+            return {}, "login_exist"
+        if await self.check_email(uow, user.email):
+            return {}, "email_exist"
+        async with uow:
             user.password = generate_password_hash(user.password)
             user_dict = user.model_dump()
 
@@ -49,3 +61,51 @@ class UsersService:
             users = await uow.users.get_all()
             return users
 
+    async def update_user_info(self, uow: IUnitOfWork, user_id: int, user_info: dict):
+        if user_info.get("login") and await self.check_login(uow, user_info.get("login")):
+            return {}, "login_exist"
+        if user_info.get("email") and await self.check_email(uow, user_info.get("email")):
+            return {}, "email_exist"
+        async with uow:
+            user = await uow.users.update_one(obj_id=user_id, data=user_info)
+            await uow.commit()
+            return user, None
+
+    @staticmethod
+    async def update_user_password(uow: IUnitOfWork, user_id: int, old_password: str, new_password: str):
+        async with uow:
+            user = await uow.users.read_one(id=user_id)
+            if not user:
+                return {}, "user_not_exist"
+
+            if check_password_hash(user.password, old_password):
+                user = await uow.users.update_one(
+                    obj_id=user_id,
+                    data={
+                        "password": generate_password_hash(new_password)
+                    }
+                )
+                await uow.commit()
+                return user, None
+            else:
+                return {}, "incorrect_password"
+
+    @staticmethod
+    async def delete_user_by_id(uow: IUnitOfWork, user_id: int):
+        async with uow:
+            deleted_tokens_ids = [del_id[0] for del_id in await uow.tokens.delete(user_id=user_id)]
+            deleted_tasks_ids = [del_id.id for del_id in await uow.tasks.get_all(author_id=user_id)]
+            deleted_tasks_ids += [del_id.id for del_id in await uow.tasks.get_all(assignee_id=user_id)]
+            deleted_tasks_ids = set(deleted_tasks_ids)
+            for task_id in deleted_tasks_ids:
+                await uow.tasks_attachments.delete(task_id=task_id)
+                await uow.tasks.delete_one_by_id(obj_id=task_id)
+            deleted_notifications_ids = [del_id[0] for del_id in await uow.notifications.delete(user_id=user_id)]
+            deleted_user_id = await uow.users.delete_one_by_id(obj_id=user_id)
+            await uow.commit()
+            return {
+                "deleted_user_id": deleted_user_id,
+                "deleted_tokens_ids": deleted_tokens_ids,
+                "deleted_tasks_ids": deleted_tasks_ids,
+                "deleted_notifications_ids": deleted_notifications_ids
+            }
