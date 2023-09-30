@@ -30,3 +30,8 @@ class UserRegistration(UserLogin):
 
 class UserResponseModel(ResponseModel):
     data: UserResponse
+
+
+class UsersResponseModel(ResponseModel):
+    data: list[UserResponse]
+
