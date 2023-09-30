@@ -47,9 +47,9 @@ class SQLAlchemyRepository(AbstractRepository):
         return obj
 
     async def update_one(self, obj_id: int, data: dict) -> int:
-        stmt = update(self.model).values(**data).filter_by(id=obj_id).returning(self.model.id)
+        stmt = update(self.model).values(**data).filter_by(id=obj_id).returning(self.model)
         obj = await self.session.execute(stmt)
-        return obj.scalar_one()
+        return obj.first()[0]
 
     async def delete_one_by_id(self, obj_id: int) -> int:
         stmt = delete(self.model).filter_by(id=obj_id).returning(self.model.id)
