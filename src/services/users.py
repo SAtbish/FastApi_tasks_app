@@ -8,6 +8,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class UsersService:
     @staticmethod
+    async def get_user(uow: IUnitOfWork, user_info: dict[str, Any]):
+        async with uow:
+            user = await uow.users.read_one(**user_info)
+            if not user:
+                return None, "user_not_exist"
+            else:
+                return user.to_read_model(), None
+
+    @staticmethod
     async def create_user(uow: IUnitOfWork, user: UserRegistration) -> tuple[dict[str | Any], Error]:
         async with uow:
             # checking for login existence
