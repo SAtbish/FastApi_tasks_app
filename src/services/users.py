@@ -17,18 +17,21 @@ class UsersService:
                 return user.to_read_model(), None
 
     @staticmethod
-    async def create_user(uow: IUnitOfWork, user: UserRegistration) -> tuple[dict[str | Any], Error]:
+    async def check_login(uow: IUnitOfWork, login: str):
         async with uow:
-            # checking for login existence
-            exist_login = await uow.users.read_one(login=user.login)
-            if exist_login:
-                return {}, "login_exist"
+            return await uow.users.read_one(login=login)
 
-            # checking for email existence
-            exist_email = await uow.users.read_one(email=user.email)
-            if exist_email:
-                return {}, "email_exist"
+    @staticmethod
+    async def check_email(uow: IUnitOfWork, email: str):
+        async with uow:
+            return await uow.users.read_one(email=email)
 
+    async def create_user(self, uow: IUnitOfWork, user: UserRegistration) -> tuple[dict[str | Any], Error]:
+        if await self.check_login(uow, user.login):
+            return {}, "login_exist"
+        if await self.check_email(uow, user.email):
+            return {}, "email_exist"
+        async with uow:
             user.password = generate_password_hash(user.password)
             user_dict = user.model_dump()
 
@@ -57,6 +60,16 @@ class UsersService:
         async with uow:
             users = await uow.users.get_all()
             return users
+
+    async def update_user_info(self, uow: IUnitOfWork, user_id: int, user_info: dict):
+        if user_info.get("login") and await self.check_login(uow, user_info.get("login")):
+            return {}, "login_exist"
+        if user_info.get("email") and await self.check_email(uow, user_info.get("email")):
+            return {}, "email_exist"
+        async with uow:
+            user = await uow.users.update_one(obj_id=user_id, data=user_info)
+            await uow.commit()
+            return user, None
 
     @staticmethod
     async def delete_user_by_id(uow: IUnitOfWork, user_id: int):
