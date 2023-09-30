@@ -25,6 +25,10 @@ from src.services.users import UsersService
         status.HTTP_401_UNAUTHORIZED: {
             "model": ResponseModel,
             "description": "User not authorized. Check message",
+        },
+        status.HTTP_409_CONFLICT: {
+            "model": ResponseModel,
+            "description": "User can delete only yourself",
         }
     }
 )
