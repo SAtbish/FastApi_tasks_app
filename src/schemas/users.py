@@ -3,14 +3,17 @@ from pydantic import BaseModel, Field, EmailStr, constr
 from src.schemas.base import ResponseModel
 
 
-class UserResponse(BaseModel):
-    name: str
-    login: str
-    email: str
+class UserInfoModel(BaseModel):
+    name: str | None = None
+    login: str | None = None
+    email: str | None = None
+
+
+class UserInfo(UserInfoModel):
     is_confirmed: bool
 
 
-class UserSchema(UserResponse):
+class UserSchema(UserInfo):
     id: int
     password: str
 
@@ -29,11 +32,11 @@ class UserRegistration(UserLogin):
 
 
 class UserResponseModel(ResponseModel):
-    data: UserResponse
+    data: UserInfo
 
 
 class UsersResponseModel(ResponseModel):
-    data: list[UserResponse]
+    data: list[UserInfo]
 
 
 class GetUserRequest(BaseModel):
