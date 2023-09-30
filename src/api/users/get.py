@@ -40,14 +40,15 @@ async def get_user_handler(
     user_info = user_info.model_dump(exclude_none=True)
     user, err = await UsersService().get_user(uow, user_info)
     if err:
-        return JSONResponse(
+        response = JSONResponse(
             content=ResponseModel(message=err).__dict__,
             status_code=status.HTTP_409_CONFLICT
         )
-    response = JSONResponse(
-        content=UserResponseModel(data=user.model_dump(exclude=["id", "password"])).model_dump(),
-        status_code=status.HTTP_200_OK
-    )
+    else:
+        response = JSONResponse(
+            content=UserResponseModel(data=user.model_dump(exclude=["id", "password"])).model_dump(),
+            status_code=status.HTTP_200_OK
+        )
     for key, value in tokens.items():
         response.set_cookie(key, value)
 
