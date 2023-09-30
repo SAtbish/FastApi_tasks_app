@@ -3,19 +3,27 @@ from pydantic import BaseModel, Field, EmailStr, constr
 from src.schemas.base import ResponseModel
 
 
-class UserResponse(BaseModel):
-    name: str
-    login: str
-    email: str
+class UserInfoModel(BaseModel):
+    name: str | None = None
+    login: str | None = None
+    email: str | None = None
+
+
+class UserInfo(UserInfoModel):
     is_confirmed: bool
 
 
-class UserSchema(UserResponse):
+class UserSchema(UserInfo):
     id: int
     password: str
 
     class Config:
         from_attributes = True
+
+
+class ChangeUserPassword(BaseModel):
+    new_password: constr(pattern="^[A-Za-z0-9-!№;$%^&*():?/|.,~`]+$", min_length=8, max_length=64)
+    old_password: constr(pattern="^[A-Za-z0-9-!№;$%^&*():?/|.,~`]+$", min_length=8, max_length=64)
 
 
 class UserLogin(BaseModel):
@@ -29,9 +37,25 @@ class UserRegistration(UserLogin):
 
 
 class UserResponseModel(ResponseModel):
-    data: UserResponse
+    data: UserInfo
 
 
 class UsersResponseModel(ResponseModel):
-    data: list[UserResponse]
+    data: list[UserInfo]
 
+
+class GetUserRequest(BaseModel):
+    name: str | None = None
+    login: str | None = None
+    email: str | None = None
+    is_confirmed: bool | None = None
+
+    def get_not_none_values(self):
+        return self.model_dump()
+
+
+class UserDeletionInfo(BaseModel):
+    deleted_user_id: int
+    deleted_tokens_ids: list[int]
+    deleted_tasks_ids: list[int]
+    deleted_notifications_ids: list[int]
