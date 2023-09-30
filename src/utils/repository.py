@@ -59,7 +59,7 @@ class SQLAlchemyRepository(AbstractRepository):
     async def get_all(self, **filters):
         stmt = select(self.model).filter_by(**filters)
         objects = await self.session.execute(stmt)
-        result = [obj[0] for obj in objects.all()]
+        result = [obj[0].to_read_model() for obj in objects.all()]
         return result
 
 
