@@ -21,6 +21,11 @@ class UserSchema(UserInfo):
         from_attributes = True
 
 
+class ChangeUserPassword(BaseModel):
+    new_password: constr(pattern="^[A-Za-z0-9-!№;$%^&*():?/|.,~`]+$", min_length=8, max_length=64)
+    old_password: constr(pattern="^[A-Za-z0-9-!№;$%^&*():?/|.,~`]+$", min_length=8, max_length=64)
+
+
 class UserLogin(BaseModel):
     login: str = Field(min_length=1, max_length=64, description="User login")
     password: constr(pattern="^[A-Za-z0-9-!№;$%^&*():?/|.,~`]+$", min_length=8, max_length=64)
