@@ -35,3 +35,12 @@ class UserResponseModel(ResponseModel):
 class UsersResponseModel(ResponseModel):
     data: list[UserResponse]
 
+
+class GetUserRequest(BaseModel):
+    name: str | None = None
+    login: str | None = None
+    email: str | None = None
+    is_confirmed: bool | None = None
+
+    def get_not_none_values(self):
+        return self.model_dump()
