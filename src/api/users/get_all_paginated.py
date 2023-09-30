@@ -5,9 +5,10 @@ from fastapi_pagination import Page
 from src.schemas.users import UserSchema
 from src.api.dependencies import UOWDep
 from src.services.users import UsersService
+from fastapi_cache.decorator import cache
 
 
-@router.post(
+@router.get(
     "/get/all/paginated",
     status_code=status.HTTP_200_OK,
     description=(
@@ -17,6 +18,7 @@ from src.services.users import UsersService
     summary="getting users paginated",
     response_model=Page[UserSchema]
 )
+@cache(expire=60)
 async def get_all_users_paginated_handler(
         uow: UOWDep
 ):
