@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi import status
 
 from src.schemas.base import ResponseModel
-from src.schemas.users import UserRegistration, UserResponseModel, UserResponse
+from src.schemas.users import UserRegistration, UserResponseModel, UserInfo
 from src.api.dependencies import UOWDep
 from src.services.users import UsersService
 
@@ -41,7 +41,7 @@ async def user_registration_handler(
     return JSONResponse(
         content=UserResponseModel(
             message="User registered",
-            data=UserResponse(**user_data)
+            data=UserInfo(**user_data)
         ).model_dump(),
         status_code=status.HTTP_201_CREATED
     )
