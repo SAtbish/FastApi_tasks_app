@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_pagination.paginator import paginate
 
 
 class AbstractRepository(ABC):
@@ -67,4 +67,8 @@ class SQLAlchemyRepository(AbstractRepository):
         result = [obj[0].to_read_model() for obj in objects.all()]
         return result
 
-
+    async def get_all_paginated(self, **filters):
+        stmt = select(self.model).filter_by(**filters)
+        objects = await self.session.execute(stmt)
+        paginated_objects = paginate(sequence=[obj[0] for obj in objects.all()])
+        return paginated_objects
