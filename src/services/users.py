@@ -2,6 +2,8 @@ from typing import Any
 
 from src.enums import Error
 from src.schemas.users import UserRegistration, UserLogin
+from src.utils.notifications import make_confirm_email_notification
+from src.utils.redis import save_notification_to_redis
 from src.utils.unitofwork import IUnitOfWork
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -36,6 +38,11 @@ class UsersService:
             user_dict = user.model_dump()
 
             user_obj = await uow.users.create_one(data=user_dict)
+            (not_saved, err) = await save_notification_to_redis(
+                make_confirm_email_notification(user_id=user_obj.id, email=user_obj.email)
+            )
+            if not_saved:
+                return {}, err
             await uow.commit()
             return user_obj.model_dump(exclude=["password", "id"]), None
 
