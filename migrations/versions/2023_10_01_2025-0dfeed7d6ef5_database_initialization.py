@@ -1,8 +1,8 @@
 """Database initialization
 
-Revision ID: cf52931a86bb
+Revision ID: 0dfeed7d6ef5
 Revises: 
-Create Date: 2023-09-30 01:44:12.817140
+Create Date: 2023-10-01 20:25:13.335559
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cf52931a86bb'
+revision: str = '0dfeed7d6ef5'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -39,12 +39,10 @@ def upgrade() -> None:
     sa.Column('header', sa.String(), nullable=False),
     sa.Column('message', sa.String(), nullable=False),
     sa.Column('type', sa.String(), nullable=False),
-    sa.Column('recipient', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('sent_datetime', sa.DateTime(), nullable=False),
-    sa.Column('is_read', sa.Boolean(), nullable=False),
-    sa.Column('read_datetime', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['recipient'], ['users.id'], ),
     sa.ForeignKeyConstraint(['type'], ['notification_types.type'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('tasks',
