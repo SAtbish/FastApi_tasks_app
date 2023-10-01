@@ -20,3 +20,10 @@ async def save_notification_to_redis(notification: NotificationRedisModel) -> tu
     return False, None
 
 
+async def get_notifications_from_redis():
+    before_keys = await rw.r.keys(f"{REDIS_NAME}:{REDIS_NOTIFICATIONS_KEY}:list")
+    notifications = await rw.get_redis(before_keys)
+    if notifications:
+        return notifications[f'{REDIS_NOTIFICATIONS_KEY}']
+    else:
+        return []
