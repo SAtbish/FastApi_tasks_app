@@ -4,7 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from redis import asyncio as aioredis
+from src.redis_worker.redis_worker import r
+from src.tasks.celery_worker import celery_app
+from multiprocessing import Process
+from subprocess import Popen
 
 
 app = FastAPI(
@@ -22,8 +25,12 @@ add_pagination(app)
 
 @app.on_event("startup")
 async def startup_event():
-    redis = aioredis.from_url("redis://localhost", encoding="utf8", decode_responses=True)
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+    FastAPICache.init(RedisBackend(r), prefix="fastapi-cache")
+
 
 if __name__ == "__main__":
+    celery_worker_process = Process(target=celery_app.worker_main,
+                                    kwargs={"argv": ["worker", "--loglevel=info", "--pool=solo", "-E"]})
+    celery_worker_process.start()
+    celery_beat_process = Popen(["celery", "--app", "src.tasks.celery_worker", "beat", "--loglevel=info"])
     uvicorn.run(app="src.api:app", reload=True)
