@@ -1,11 +1,11 @@
 from src.api.users.router import router
-from fastapi.responses import JSONResponse
 from fastapi import status
 
 from src.schemas.base import ResponseModel
 from src.schemas.users import UserLogin
 from src.api.dependencies import UOWDep
 from src.services.users import UsersService
+from src.utils.create_response import create_response
 
 
 @router.post(
@@ -34,16 +34,16 @@ async def user_login_handler(
 ):
     user_tokens, err = await UsersService().login_user(uow, user)
     if err:
-        response = JSONResponse(
-            content=ResponseModel(message=err).__dict__,
-            status_code=status.HTTP_409_CONFLICT
+        response = create_response(
+            content=ResponseModel(message=err),
+            status=status.HTTP_409_CONFLICT
         )
     else:
-        response = JSONResponse(
+        response = create_response(
             content=ResponseModel(
                 message="User log in"
-            ).__dict__,
-            status_code=status.HTTP_200_OK
+            ),
+            status=status.HTTP_200_OK
         )
         response.set_cookie("access_token", user_tokens["access_token"], samesite="none", secure=True)
         response.set_cookie("refresh_token", user_tokens["refresh_token"], samesite="none", secure=True)
