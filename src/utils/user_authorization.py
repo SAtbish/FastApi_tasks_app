@@ -1,15 +1,9 @@
-import json
-
 from fastapi import Request
 from src.utils.unitofwork import UnitOfWork
 from src.services.tokens import TokensService
 
 
 async def user_authorization(request: Request):
-    try:
-        json_request = await request.json()
-    except json.JSONDecodeError:
-        json_request = {}
 
     args_request = dict(request.query_params)
 
@@ -19,14 +13,8 @@ async def user_authorization(request: Request):
     }
 
     if not user_tokens.get("access_token"):
-        user_tokens = {
-            "access_token": json_request.get("access_token"),
-            "refresh_token": json_request.get("refresh_token"),
-        }
-
-        if not user_tokens.get("access_token"):
-            user_tokens["access_token"] = args_request.get("access_token")
-            user_tokens["refresh_token"] = args_request.get("refresh_token")
+        user_tokens["access_token"] = args_request.get("access_token")
+        user_tokens["refresh_token"] = args_request.get("refresh_token")
 
         if not user_tokens.get("access_token"):
             return {}, "Failed to get access_token"
