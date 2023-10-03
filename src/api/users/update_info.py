@@ -1,13 +1,13 @@
 from starlette.requests import Request
 
 from src.api.users.router import router
-from fastapi.responses import JSONResponse
 from fastapi import status
 
 from src.schemas.base import ResponseModel
 from src.schemas.users import UserResponseModel, UserInfoModel
 from src.api.dependencies import UOWDep
 from src.services.users import UsersService
+from src.utils.create_response import create_response
 
 
 @router.post(
@@ -41,32 +41,29 @@ async def update_user_info_handler(
         request: Request
 ):
     sender_user_id = int(request.cookies.get("user_id", 0))
-    user_info = user_info.model_dump(exclude_none=True)
     user, err = await UsersService().get_user(uow, user_info={"id": user_id})
     if err:
-        response = JSONResponse(
-            content=ResponseModel(message=err).__dict__,
-            status_code=status.HTTP_409_CONFLICT
+        return create_response(
+            content=ResponseModel(message=err),
+            status=status.HTTP_409_CONFLICT
         )
     else:
         if user_id != sender_user_id:
-            response = JSONResponse(
-                content=ResponseModel(message="User can edit only yourself").__dict__,
-                status_code=status.HTTP_409_CONFLICT
+            return create_response(
+                content=ResponseModel(message="User can edit only yourself"),
+                status=status.HTTP_409_CONFLICT
             )
         else:
-            user, err = await UsersService().update_user_info(uow, user_id=sender_user_id, user_info=user_info)
+            user, err = await UsersService().update_user_info(uow, user_id=sender_user_id, user_info=user_info.model_dump(exclude_none=True))
             if err:
-                response = JSONResponse(
-                    content=ResponseModel(message=err).__dict__,
-                    status_code=status.HTTP_409_CONFLICT
+                return create_response(
+                    content=ResponseModel(message=err),
+                    status=status.HTTP_409_CONFLICT
                 )
             else:
-                response = JSONResponse(
+                return create_response(
                     content=UserResponseModel(
                         data=user.to_read_model().model_dump(exclude=["id", "password"])
-                    ).model_dump(),
-                    status_code=status.HTTP_200_OK
+                    ),
+                    status=status.HTTP_200_OK
                 )
-
-    return response
