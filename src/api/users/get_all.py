@@ -4,7 +4,7 @@ from fastapi import status
 
 from src.schemas.base import ResponseModel
 from src.schemas.users import UsersResponseModel
-from src.api.dependencies import UOWDep, AuthorizationDep
+from src.api.dependencies import UOWDep
 from src.services.users import UsersService
 from fastapi_cache.decorator import cache
 
@@ -31,7 +31,6 @@ from fastapi_cache.decorator import cache
 )
 @cache(expire=60)
 async def get_all_users_handler(
-        tokens: AuthorizationDep,
         uow: UOWDep
 ):
     users = await UsersService().get_all(uow)
@@ -39,7 +38,5 @@ async def get_all_users_handler(
         content=UsersResponseModel(data=[user.model_dump(exclude=["id", "password"]) for user in users]).model_dump(),
         status_code=status.HTTP_200_OK
     )
-    for key, value in tokens.items():
-        response.set_cookie(key, value)
 
     return response

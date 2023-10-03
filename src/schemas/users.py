@@ -59,3 +59,7 @@ class UserDeletionInfo(BaseModel):
     deleted_tokens_ids: list[int]
     deleted_tasks_ids: list[int]
     deleted_notifications_ids: list[int]
+
+
+class UserDeletionResponse(ResponseModel):
+    data: UserDeletionInfo

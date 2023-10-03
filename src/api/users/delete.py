@@ -1,11 +1,13 @@
+from starlette.requests import Request
+
 from src.api.users.router import router
-from fastapi.responses import JSONResponse
 from fastapi import status
 
 from src.schemas.base import ResponseModel
-from src.schemas.users import UserDeletionInfo
-from src.api.dependencies import UOWDep, AuthorizationDep
+from src.schemas.users import UserDeletionResponse, UserDeletionInfo
+from src.api.dependencies import UOWDep
 from src.services.users import UsersService
+from src.utils.create_response import create_response
 
 
 @router.post(
@@ -16,10 +18,10 @@ from src.services.users import UsersService
             "Delete user by id"
     ),
     summary="delete user",
-    response_model=UserDeletionInfo,
+    response_model=UserDeletionResponse,
     responses={
         status.HTTP_200_OK: {
-            "model": UserDeletionInfo,
+            "model": UserDeletionResponse,
             "description": "User deleted",
         },
         status.HTTP_401_UNAUTHORIZED: {
@@ -34,21 +36,20 @@ from src.services.users import UsersService
 )
 async def delete_user_handler(
         user_id: int,
-        tokens: AuthorizationDep,
-        uow: UOWDep
+        uow: UOWDep,
+        request: Request
 ):
-    if tokens["user_id"] == user_id:
+    sender_user_id = int(request.cookies.get("user_id", 0))
+    if sender_user_id == user_id:
         deletion_info = await UsersService().delete_user_by_id(uow, user_id=user_id)
-        response = JSONResponse(
-            content=UserDeletionInfo(**deletion_info).model_dump(),
-            status_code=status.HTTP_200_OK
+        return create_response(
+            content=UserDeletionResponse(
+                data=UserDeletionInfo(**deletion_info)
+            ),
+            status=status.HTTP_200_OK
         )
     else:
-        response = JSONResponse(
-            content=ResponseModel(message="User can delete only yourself").model_dump(),
-            status_code=status.HTTP_409_CONFLICT
+        return create_response(
+            content=ResponseModel(message="User can delete only yourself"),
+            status=status.HTTP_409_CONFLICT
         )
-    for key, value in tokens.items():
-        response.set_cookie(key, value)
-
-    return response
