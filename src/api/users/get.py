@@ -1,11 +1,11 @@
 from src.api.users.router import router
-from fastapi.responses import JSONResponse
 from fastapi import status
 
 from src.schemas.base import ResponseModel
 from src.schemas.users import UserResponseModel, GetUserRequest
 from src.api.dependencies import UOWDep
 from src.services.users import UsersService
+from src.utils.create_response import create_response
 
 
 @router.post(
@@ -39,14 +39,12 @@ async def get_user_handler(
     user_info = user_info.model_dump(exclude_none=True)
     user, err = await UsersService().get_user(uow, user_info)
     if err:
-        response = JSONResponse(
-            content=ResponseModel(message=err).__dict__,
-            status_code=status.HTTP_409_CONFLICT
+        return create_response(
+            content=ResponseModel(message=err),
+            status=status.HTTP_409_CONFLICT
         )
     else:
-        response = JSONResponse(
-            content=UserResponseModel(data=user.model_dump(exclude=["id", "password"])).model_dump(),
-            status_code=status.HTTP_200_OK
+        return create_response(
+            content=UserResponseModel(data=user.model_dump(exclude=["id", "password"])),
+            status=status.HTTP_200_OK
         )
-
-    return response
