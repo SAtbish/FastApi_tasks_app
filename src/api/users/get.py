@@ -4,7 +4,7 @@ from fastapi import status
 
 from src.schemas.base import ResponseModel
 from src.schemas.users import UserResponseModel, GetUserRequest
-from src.api.dependencies import UOWDep, AuthorizationDep
+from src.api.dependencies import UOWDep
 from src.services.users import UsersService
 
 
@@ -34,7 +34,6 @@ from src.services.users import UsersService
 )
 async def get_user_handler(
         user_info: GetUserRequest,
-        tokens: AuthorizationDep,
         uow: UOWDep
 ):
     user_info = user_info.model_dump(exclude_none=True)
@@ -49,7 +48,5 @@ async def get_user_handler(
             content=UserResponseModel(data=user.model_dump(exclude=["id", "password"])).model_dump(),
             status_code=status.HTTP_200_OK
         )
-    for key, value in tokens.items():
-        response.set_cookie(key, value)
 
     return response
