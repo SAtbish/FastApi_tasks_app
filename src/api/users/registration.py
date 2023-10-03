@@ -1,11 +1,11 @@
 from src.api.users.router import router
-from fastapi.responses import JSONResponse
 from fastapi import status
 
 from src.schemas.base import ResponseModel
 from src.schemas.users import UserRegistration, UserResponseModel, UserInfo
 from src.api.dependencies import UOWDep
 from src.services.users import UsersService
+from src.utils.create_response import create_response
 
 
 @router.post(
@@ -34,14 +34,14 @@ async def user_registration_handler(
 ):
     user_data, err = await UsersService().create_user(uow, user)
     if err:
-        return JSONResponse(
-            content=ResponseModel(message=err).__dict__,
-            status_code=status.HTTP_409_CONFLICT
+        return create_response(
+            content=ResponseModel(message=err),
+            status=status.HTTP_409_CONFLICT
         )
-    return JSONResponse(
+    return create_response(
         content=UserResponseModel(
             message="User registered",
             data=UserInfo(**user_data)
-        ).model_dump(),
-        status_code=status.HTTP_201_CREATED
+        ),
+        status=status.HTTP_201_CREATED
     )
