@@ -34,7 +34,7 @@ async def startup_event():
 
 
 @app.middleware("http")
-async def add_process_time_header(request: Request,  call_next):
+async def add_authorization(request: Request,  call_next):
     tokens = {}
 
     if request.url.path not in NOT_AUTHORIZATION_PATHS:
