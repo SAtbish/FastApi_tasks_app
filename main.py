@@ -1,3 +1,5 @@
+import re
+
 from starlette.requests import Request
 import uvicorn
 from fastapi import FastAPI, status
@@ -13,7 +15,14 @@ from src.tasks.celery_worker import celery_app
 from multiprocessing import Process
 from subprocess import Popen
 
-NOT_AUTHORIZATION_PATHS = ["/", "/docs", "/openapi.json", "/users/registration", "/users/login"]
+NOT_AUTHORIZATION_PATTERNS = [
+    r"/?",
+    "/docs",
+    "/openapi.json",
+    "/users/registration",
+    "/users/login",
+    r"\b/users/confirm/email/\d/[0-9A-Za-z]\b"
+]
 
 app = FastAPI(
     title="Приложение для ведения задач пользователей"
@@ -36,8 +45,7 @@ async def startup_event():
 @app.middleware("http")
 async def add_authorization(request: Request,  call_next):
     tokens = {}
-
-    if request.url.path not in NOT_AUTHORIZATION_PATHS:
+    if not any([re.fullmatch(pattern, request.url.path) for pattern in NOT_AUTHORIZATION_PATTERNS]):
         tokens, err = await user_authorization(request)
         if not tokens:
             return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={'message': err})
