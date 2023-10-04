@@ -1,3 +1,4 @@
+import hashlib
 from typing import Any
 
 from src.enums import Error
@@ -122,3 +123,14 @@ class UsersService:
                 "deleted_tasks_ids": deleted_tasks_ids,
                 "deleted_notifications_ids": deleted_notifications_ids
             }
+
+    async def confirm_user_email(self, uow: IUnitOfWork, user_info: dict[str, Any], email_hash: str):
+        async with uow:
+            user, err = await self.get_user(uow, user_info)
+            if err:
+                return err
+
+            if email_hash == hashlib.md5(bytes(user.email, "utf-8")).hexdigest():
+                await self.update_user_info(uow, user_id=user.id, user_info={"is_confirmed": True})
+            else:
+                return "wrong_email"
