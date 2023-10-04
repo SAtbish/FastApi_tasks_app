@@ -129,8 +129,10 @@ class UsersService:
             user, err = await self.get_user(uow, user_info)
             if err:
                 return err
-
-            if email_hash == hashlib.md5(bytes(user.email, "utf-8")).hexdigest():
-                await self.update_user_info(uow, user_id=user.id, user_info={"is_confirmed": True})
+            if not user.is_confirmed:
+                if email_hash == hashlib.md5(bytes(user.email, "utf-8")).hexdigest():
+                    await self.update_user_info(uow, user_id=user.id, user_info={"is_confirmed": True})
+                else:
+                    return "wrong_email"
             else:
-                return "wrong_email"
+                return "already_confirmed"
