@@ -11,7 +11,7 @@ from src.utils.create_response import create_response
 @router.post(
     "/registration",
     response_model=UserResponseModel | ResponseModel,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     description=(
             "Регистрирует пользователя\n\n"
             "Registrate user"
