@@ -17,7 +17,7 @@ async def insert_notifications_to_database():
     for notification in income_notifications:
         async with uow:
             user, err = await UsersService().get_user(uow, user_info={"id": notification.user_id})
-            if not err:
+            if not err and (user.is_confirmed or notification.type == "confirm_email"):
                 await NotificationsService().create_notification(uow, notification)
                 await send_message_to_email(notification=notification, user_email=user.email)
     await rw.income_notifications.set([])
