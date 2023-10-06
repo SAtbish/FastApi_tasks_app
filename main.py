@@ -9,6 +9,8 @@ from fastapi_pagination import add_pagination
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
+from src.services.notifications_types import NotificationsTypesService
+from src.utils.unitofwork import UnitOfWork
 from src.utils.user_authorization import user_authorization
 from src.redis_worker.redis_worker import r
 from src.tasks.celery_worker import celery_app
@@ -16,12 +18,12 @@ from multiprocessing import Process
 from subprocess import Popen
 
 NOT_AUTHORIZATION_PATTERNS = [
-    r"/?",
+    "/",
     "/docs",
     "/openapi.json",
     "/users/registration",
     "/users/login",
-    r"\b/users/confirm/email/\d/[0-9A-Za-z]\b"
+    r"^/users/confirm/email/\d+/[0-9A-Za-z]+$"
 ]
 
 app = FastAPI(
@@ -40,6 +42,7 @@ add_pagination(app)
 @app.on_event("startup")
 async def startup_event():
     FastAPICache.init(RedisBackend(r), prefix="fastapi-cache")
+    await NotificationsTypesService.create_notification_types(uow=UnitOfWork())
 
 
 @app.middleware("http")
