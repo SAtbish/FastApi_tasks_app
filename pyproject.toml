@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Alexey <97658978+SAtbish@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{include = "fastapi_tasks_app"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -20,6 +19,7 @@ fastapi-pagination = "^0.12.10"
 fastapi-cache2 = {extras = ["redis"], version = "^0.2.1"}
 celery = "^5.3.4"
 email-validator = "^2.0.0.post2"
+gunicorn = "^21.2.0"
 
 
 [build-system]
