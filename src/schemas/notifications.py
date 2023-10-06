@@ -13,3 +13,8 @@ class NotificationRedisModel(BaseModel):
 class NotificationSchema(NotificationRedisModel):
     id: int
     sent_datetime: datetime
+
+
+class NotificationTypesSchema(BaseModel):
+    type: str
+    description: str
