@@ -1,0 +1,57 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    container_name: db_app
+    command: -p 1234
+    expose:
+      - 1234
+    env_file:
+      - .docker_env
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/var/lib/redis/data/
+    container_name: redis_app
+    command: --port 5678
+    expose:
+      - 5678
+    depends_on:
+      - db
+
+  app:
+    build:
+      context: .
+    env_file:
+      - .docker_env
+    container_name: fastapi_app
+    command: ["/fastapi_app/docker_scripts/app.sh"]
+    ports:
+      - 9090:8000
+    depends_on:
+      - redis
+
+  celery:
+    build:
+      context: .
+    env_file:
+      - .docker_env
+    container_name: celery_app
+    command: ["/fastapi_app/docker_scripts/celery.sh"]
+    depends_on:
+      - app
+
+  celerybeat:
+    build:
+      context: .
+    env_file: .docker_env
+    container_name: celerybeat
+    command: [ "/fastapi_app/docker_scripts/celerybeat.sh" ]
+    depends_on:
+      - celery
+volumes:
+  postgres_data:
+  redis_data:
