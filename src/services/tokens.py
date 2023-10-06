@@ -19,7 +19,7 @@ class TokensService:
                 }
             )
             await uow.commit()
-            return new_token.model_dump(exclude=["id"]), None
+            return new_token.model_dump(exclude=["id"])
 
     @staticmethod
     async def get_token(uow: IUnitOfWork, access_token: int):
