@@ -57,7 +57,7 @@ class GetUserRequest(BaseModel):
 class UserDeletionInfo(BaseModel):
     deleted_user_id: int
     deleted_tokens_ids: list[int]
-    deleted_tasks_ids: list[int]
+    deleted_tasks_ids: set[int]
     deleted_notifications_ids: list[int]
 
 
