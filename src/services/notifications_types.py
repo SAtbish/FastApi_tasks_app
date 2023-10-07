@@ -10,4 +10,7 @@ class NotificationsTypesService:
                 await uow.notification_types.create_one(
                     data={"type": "confirm_email", "description": "confirm email"}
                 )
+                await uow.notification_types.create_one(
+                    data={"type": "new_task", "description": "new task"}
+                )
             await uow.commit()

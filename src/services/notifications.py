@@ -11,4 +11,4 @@ class NotificationsService:
                 data={**notification.model_dump(), "sent_datetime": datetime.now()}
             )
             await uow.commit()
-            return new_notification.model_dump(exclude=["id"]), None
+            return new_notification.model_dump(exclude=["id"])
