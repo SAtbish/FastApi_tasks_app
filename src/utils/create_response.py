@@ -1,8 +1,6 @@
 import json
 from datetime import datetime
-
 from fastapi.responses import JSONResponse
-
 from src.schemas.base import ResponseModel
 
 

@@ -12,6 +12,7 @@ env.bak/
 venv.bak/
 poetry.lock
 celerybeat-schedule.*
+.docker_env
 
 # IDE
 .vscode/
