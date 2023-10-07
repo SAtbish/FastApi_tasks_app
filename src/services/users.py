@@ -2,7 +2,7 @@ import hashlib
 from typing import Any
 
 from src.enums import Error
-from src.schemas.users import UserRegistration, UserLogin
+from src.schemas.users import UserRegistration, UserLogin, UserDeletionInfo
 from src.utils.notifications import make_confirm_email_notification
 from src.utils.redis import save_notification_to_redis
 from src.utils.unitofwork import IUnitOfWork
@@ -117,12 +117,12 @@ class UsersService:
             deleted_notifications_ids = [del_id[0] for del_id in await uow.notifications.delete(user_id=user_id)]
             deleted_user_id = await uow.users.delete_one_by_id(obj_id=user_id)
             await uow.commit()
-            return {
-                "deleted_user_id": deleted_user_id,
-                "deleted_tokens_ids": deleted_tokens_ids,
-                "deleted_tasks_ids": deleted_tasks_ids,
-                "deleted_notifications_ids": deleted_notifications_ids
-            }
+            return UserDeletionInfo(
+                deleted_user_id=deleted_user_id,
+                deleted_tokens_ids=deleted_tokens_ids,
+                deleted_tasks_ids=deleted_tasks_ids,
+                deleted_notifications_ids=deleted_notifications_ids
+            )
 
     async def confirm_user_email(self, uow: IUnitOfWork, user_info: dict[str, Any], email_hash: str):
         async with uow:
